@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import Base, engine
-from app.models import TaxiTariff, Order, RouteSearch
-from app.routers import tariffs, orders, route_searches
+from cuhack_domostroy.App.backend.app.database import Base, engine
+from cuhack_domostroy.App.backend.app.models import TaxiTariff, Order, RouteSearch
+from cuhack_domostroy.App.backend.app.routers import tariffs
+from cuhack_domostroy.App.backend.app.routers import orders, route_searches
 
 Base.metadata.create_all(bind=engine)
 
