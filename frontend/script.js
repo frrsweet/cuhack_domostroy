@@ -10,12 +10,14 @@ const tariffs = [
 const orderButton = document.getElementById('orderButton');
 const orderModal = document.getElementById('orderModal');
 const warningModal = document.getElementById('warningModal');
+const autopilotModal = document.getElementById('autopilotModal');
 const routeMapModal = document.getElementById('routeMapModal');
 const driverArrivalModal = document.getElementById('driverArrivalModal');
 const tripScreen = document.getElementById('tripScreen');
 const closeModal = document.getElementById('closeModal');
 const closeWarning = document.getElementById('closeWarning');
 const closeRouteMap = document.getElementById('closeRouteMap');
+const autopilotStartButton = document.getElementById('autopilotStartButton');
 const fromPreview = document.getElementById('fromPreview');
 const toPreview = document.getElementById('toPreview');
 const fromInput = document.getElementById('fromInput');
@@ -39,6 +41,8 @@ let selectedTariff = tariffs[0];
 let temperature = 25;
 let musicChoice = 'radio';
 let musicText = 'FM 104.5';
+let robotArrivalSeconds = 180;
+let robotArrivalTimerId = null;
 
 function renderTariffs() {
   tariffList.innerHTML = tariffs
@@ -107,6 +111,40 @@ function closeRouteMapModal() {
   routeMapModal.setAttribute('aria-hidden', 'true');
 }
 
+function openAutopilotModal() {
+  autopilotModal.classList.remove('hidden');
+  autopilotModal.setAttribute('aria-hidden', 'false');
+  initAutopilotModel();
+}
+
+function closeAutopilotModal() {
+  autopilotModal.classList.add('hidden');
+  autopilotModal.setAttribute('aria-hidden', 'true');
+}
+
+function updateRobotWaitText() {
+  const minutes = Math.floor(robotArrivalSeconds / 60);
+  const seconds = robotArrivalSeconds % 60;
+  driverStatusText.textContent = `Бесплатное ожидание - ${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function startRobotCountdown() {
+  clearInterval(robotArrivalTimerId);
+  robotArrivalSeconds = 180;
+  updateRobotWaitText();
+
+  robotArrivalTimerId = setInterval(() => {
+    if (robotArrivalSeconds <= 0) {
+      clearInterval(robotArrivalTimerId);
+      driverStatusText.textContent = 'Бесплатное ожидание - 0:00';
+      return;
+    }
+
+    robotArrivalSeconds -= 1;
+    updateRobotWaitText();
+  }, 1000);
+}
+
 function openDriverArrivalFlow() {
   closeOrderModal();
   driverArrivalModal.classList.remove('hidden');
@@ -130,6 +168,35 @@ function openDriverArrivalFlow() {
       tripScreen.setAttribute('aria-hidden', 'false');
     });
   }, 5000);
+}
+
+function openAutopilotArrivalFlow() {
+  closeAutopilotModal();
+  driverArrivalModal.classList.remove('hidden');
+  driverArrivalModal.setAttribute('aria-hidden', 'false');
+
+  driverStatusTitle.textContent = 'Робот приехал';
+  driverStatusText.textContent = 'Бесплатное ожидание - 3:00';
+  driverArrivalActions.innerHTML = '';
+
+  const robotInfo = document.createElement('div');
+  robotInfo.className = 'driver-profile';
+  robotInfo.innerHTML = `
+    <img src="images/robot.png" alt="Робот" />
+    <div class="driver-meta">
+      <strong>Робот</strong>
+      <span>Частное лИИцо</span>
+    </div>
+  `;
+
+  const existingProfile = document.querySelector('.driver-profile');
+  if (existingProfile) {
+    existingProfile.replaceWith(robotInfo);
+  } else {
+    driverArrivalModal.querySelector('.driver-card').appendChild(robotInfo);
+  }
+
+  startRobotCountdown();
 }
 
 function closeTripScreen() {
@@ -159,6 +226,7 @@ orderButton.addEventListener('click', openModal);
 closeModal.addEventListener('click', closeOrderModal);
 closeWarning.addEventListener('click', closeWarningModal);
 closeRouteMap.addEventListener('click', closeRouteMapModal);
+autopilotStartButton.addEventListener('click', openAutopilotArrivalFlow);
 
 fromInput.addEventListener('input', syncAddressPreview);
 toInput.addEventListener('input', syncAddressPreview);
@@ -183,6 +251,9 @@ confirmOrderButton.addEventListener('click', async () => {
     return;
   }
 
+  closeOrderModal();
+  openAutopilotModal();
+
   try {
     const response = await fetch('http://localhost:8000/orders/', {
       method: 'POST',
@@ -193,11 +264,8 @@ confirmOrderButton.addEventListener('click', async () => {
     if (!response.ok) {
       throw new Error('Ошибка API');
     }
-
-    openDriverArrivalFlow();
   } catch (error) {
     console.error(error);
-    openDriverArrivalFlow();
   }
 });
 
@@ -247,6 +315,218 @@ musicConfirm.addEventListener('click', () => {
 });
 
 musicCancel.addEventListener('click', closeMusicPopup);
+
+function applyDarkCarStyle(object) {
+  object.traverse((child) => {
+    if (!child.isMesh || !child.geometry) {
+      return;
+    }
+
+    const materialList = Array.isArray(child.material) ? child.material : [child.material];
+    materialList.forEach((material) => {
+      if (!material || !material.color) {
+        return;
+      }
+
+      material.color.multiplyScalar(0.45);
+      material.color.offsetHSL(0, 0, -0.08);
+      material.flatShading = true;
+
+      if (material.emissive) {
+        material.emissive = new THREE.Color(0x111111);
+      }
+    });
+
+    if (materialList.length === 1 && materialList[0]) {
+      child.material = materialList[0];
+    } else {
+      child.material = materialList.filter(Boolean);
+    }
+
+    if (child.geometry) {
+      const outline = new THREE.LineSegments(
+        new THREE.EdgesGeometry(child.geometry, 14),
+        new THREE.LineBasicMaterial({
+          color: 0x9aa8b8,
+          transparent: true,
+          opacity: 0.9,
+        }),
+      );
+      outline.renderOrder = 2;
+      child.add(outline);
+    }
+  });
+}
+
+function initAutopilotModel() {
+  const container = document.getElementById('carModelContainer');
+  if (!container || typeof THREE === 'undefined' || !THREE.OBJLoader || !THREE.MTLLoader) {
+    return;
+  }
+
+  if (container.dataset.initialized === 'true') {
+    return;
+  }
+
+  container.dataset.initialized = 'true';
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf8f9fb);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1));
+  renderer.setClearColor(0x000000, 0);
+  container.appendChild(renderer.domElement);
+
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 1000);
+  camera.position.set(0, 1.8, 18);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 1.6);
+  scene.add(ambient);
+
+  const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
+  keyLight.position.set(8, 10, 14);
+  scene.add(keyLight);
+
+  const fillLight = new THREE.DirectionalLight(0xaec6ff, 0.7);
+  fillLight.position.set(-10, 6, -8);
+  scene.add(fillLight);
+
+  const modelGroup = new THREE.Group();
+  scene.add(modelGroup);
+
+  let rotationX = 0.5;
+  let rotationY = -0.8;
+  let scale = 1;
+  let isDragging = false;
+  let lastPointerX = 0;
+  let lastPointerY = 0;
+
+  const mtlLoader = new THREE.MTLLoader();
+  mtlLoader.load(
+    'model/model.mtl',
+    (materials) => {
+      materials.preload();
+
+      const objLoader = new THREE.OBJLoader();
+      objLoader.setMaterials(materials);
+      objLoader.load(
+        'model/model.obj',
+        (object) => {
+          object.rotation.x = -Math.PI / 2;
+          object.rotation.z = Math.PI * 0.04;
+
+          applyDarkCarStyle(object);
+
+          const box = new THREE.Box3().setFromObject(object);
+          const center = box.getCenter(new THREE.Vector3());
+          object.position.sub(center);
+
+          const size = box.getSize(new THREE.Vector3());
+          const maxSize = Math.max(size.x, size.y, size.z) || 1;
+          object.scale.setScalar(9 / maxSize);
+
+          modelGroup.add(object);
+          modelGroup.rotation.x = rotationX;
+          modelGroup.rotation.y = rotationY;
+          modelGroup.scale.setScalar(scale);
+        },
+        undefined,
+        () => {
+          console.error('Не удалось загрузить OBJ-модель автомобиля.');
+        },
+      );
+    },
+    undefined,
+    () => {
+      console.error('Не удалось загрузить MTL-файл модели автомобиля.');
+    },
+  );
+
+  const resizeRenderer = () => {
+    const width = container.clientWidth || 280;
+    const height = container.clientHeight || 220;
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+  };
+
+  const animate = () => {
+    if (!isDragging) {
+      rotationY += 0.006;
+      modelGroup.rotation.y = rotationY;
+    }
+    modelGroup.rotation.x = rotationX;
+    modelGroup.rotation.y = rotationY;
+    modelGroup.scale.setScalar(scale);
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  };
+
+  const onPointerDown = (event) => {
+    isDragging = true;
+    lastPointerX = event.clientX;
+    lastPointerY = event.clientY;
+    container.setPointerCapture(event.pointerId);
+  };
+
+  const onPointerMove = (event) => {
+    if (!isDragging) return;
+
+    const deltaX = event.clientX - lastPointerX;
+    const deltaY = event.clientY - lastPointerY;
+
+    rotationY += deltaX * 0.01;
+    rotationX += deltaY * 0.01;
+    rotationX = Math.max(-1.2, Math.min(1.2, rotationX));
+
+    lastPointerX = event.clientX;
+    lastPointerY = event.clientY;
+  };
+
+  const onPointerUp = () => {
+    isDragging = false;
+  };
+
+  const onWheel = (event) => {
+    event.preventDefault();
+    const direction = event.deltaY > 0 ? -1 : 1;
+    scale = Math.min(2.5, Math.max(0.5, scale + direction * 0.12));
+  };
+
+  const onTouchMove = (event) => {
+    if (event.touches.length === 2) {
+      const [a, b] = [event.touches[0], event.touches[1]];
+      const dx = a.clientX - b.clientX;
+      const dy = a.clientY - b.clientY;
+      const distance = Math.hypot(dx, dy);
+      if (!onTouchMove.lastDistance) {
+        onTouchMove.lastDistance = distance;
+        return;
+      }
+      const delta = (distance - onTouchMove.lastDistance) * 0.01;
+      scale = Math.min(2.5, Math.max(0.5, scale + delta));
+      onTouchMove.lastDistance = distance;
+    }
+  };
+
+  onTouchMove.lastDistance = 0;
+
+  container.addEventListener('pointerdown', onPointerDown);
+  container.addEventListener('pointermove', onPointerMove);
+  container.addEventListener('pointerup', onPointerUp);
+  container.addEventListener('pointerleave', onPointerUp);
+  container.addEventListener('wheel', onWheel, { passive: false });
+  container.addEventListener('touchmove', onTouchMove, { passive: false });
+  container.addEventListener('touchend', () => {
+    onTouchMove.lastDistance = 0;
+  });
+
+  window.addEventListener('resize', resizeRenderer);
+  resizeRenderer();
+  animate();
+}
 
 renderTariffs();
 updatePrice();

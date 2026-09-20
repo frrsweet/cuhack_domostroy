@@ -329,6 +329,76 @@ input {
   cursor: pointer;
 }
 
+.autopilot-card {
+  width: min(92vw, 700px);
+  background: white;
+  border-radius: 26px;
+  padding: 26px 22px 20px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.autopilot-card h2 {
+  margin: 0 0 18px;
+  font-size: clamp(1.8rem, 2.6vw, 2.5rem);
+  line-height: 1.25;
+}
+
+.car-model-container {
+  width: 100%;
+  height: 300px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f9fbff, #edf3ff);
+  border: 1px solid var(--line);
+  cursor: grab;
+  touch-action: none;
+}
+
+.car-model-container:active {
+  cursor: grabbing;
+}
+
+.car-model-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sources-block {
+  text-align: left;
+  margin-top: 18px;
+  padding: 0 10px;
+}
+
+.sources-block p {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.sources-block ul {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.autopilot-start-button {
+  width: 100%;
+  margin-top: 20px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #1b5ae7, #4f7bff);
+  color: white;
+  padding: 1rem 1.2rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .driver-card {
   width: min(92vw, 520px);
   text-align: center;

@@ -83,6 +83,25 @@
       </div>
     </div>
 
+    <div id="autopilotModal" class="modal hidden" aria-hidden="true">
+      <div class="autopilot-card">
+        <h2>Дешевле - не значит опаснее!</h2>
+
+        <div id="carModelContainer" class="car-model-container" aria-label="3D модель автомобиля"></div>
+
+        <div class="sources-block">
+          <p>Источники:</p>
+          <ul>
+            <li>Источник 1</li>
+            <li>Источник 2</li>
+            <li>Источник 3</li>
+          </ul>
+        </div>
+
+        <button id="autopilotStartButton" class="autopilot-start-button">Я готов, давайте начнем!</button>
+      </div>
+    </div>
+
     <div id="routeMapModal" class="modal hidden" aria-hidden="true">
       <div class="route-modal-card">
         <div class="route-modal-header">
@@ -177,6 +196,9 @@
       </div>
     </div>
 
+    <script src="vendor/three.min.js"></script>
+    <script src="vendor/MTLLoader.js"></script>
+    <script src="vendor/OBJLoader.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
