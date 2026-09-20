@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import TaxiTariff
-from app.schemas import TaxiTariffCreate, TaxiTariffOut
+from cuhack_domostroy.App.backend.app.database import get_db
+from cuhack_domostroy.App.backend.app.models import TaxiTariff
+from cuhack_domostroy.App.backend.app.schemas import TaxiTariffCreate, TaxiTariffOut
 
 router = APIRouter(prefix="/tariffs", tags=["tariffs"])
 

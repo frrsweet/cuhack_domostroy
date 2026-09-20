@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import Order, TaxiTariff
-from app.schemas import OrderCreate, OrderOut
+from cuhack_domostroy.App.backend.app.database import get_db
+from cuhack_domostroy.App.backend.app.models import Order, TaxiTariff
+from cuhack_domostroy.App.backend.app.schemas import OrderCreate, OrderOut
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 

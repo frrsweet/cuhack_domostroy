@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f2ec" />
+    <title>Horizon Drive · Автономная поездка</title>
+    <link rel="stylesheet" href="/Frontend/styles.css" />
+  </head>
+  <body>
+    <main id="app" class="app-shell">
+      <section id="welcome-screen" class="welcome-screen" aria-labelledby="welcome-title">
+        <div class="welcome-topline"><span class="status-dot"></span> СИСТЕМА АВТОНОМНОГО ДВИЖЕНИЯ</div>
+        <div class="welcome-copy">
+          <p class="eyebrow">Horizon / бортовой экран 01</p>
+          <h1 id="welcome-title">Здравствуйте,<br /><em>Джордан.</em></h1>
+          <p class="welcome-description">Ваше автономное путешествие готово к началу.</p>
+        </div>
+        <div class="robot-profile">
+          <div class="robot-image"><img src="/Frontend/assets/robot.png" alt="Ваше частное ИИ-лицо" /></div>
+          <p>ваше частное лИИцо</p>
+        </div>
+        <button id="start-button" class="start-button" type="button">
+          <span>Начать поездку</span><span class="button-arrow">↗</span>
+        </button>
+        <div class="welcome-footer"><span>Все системы готовы</span><span>20 сентября 2026</span></div>
+        <div class="welcome-orbit orbit-one"></div>
+        <div class="welcome-orbit orbit-two"></div>
+        <div class="welcome-grid"></div>
+      </section>
+
+      <section id="dashboard" class="dashboard hidden" aria-label="Панель управления Horizon Drive">
+        <header class="topbar">
+          <div class="brand-mark"><span class="brand-symbol">◒</span><span>HORIZON</span></div>
+          <div class="drive-status"><span class="status-dot"></span><span>Автономное управление</span><span class="divider"></span><span id="current-time">09:41</span></div>
+          <button id="top-sos-button" class="top-sos-button" type="button"><span>!</span> Экстренная помощь</button>
+        </header>
+
+        <div class="dashboard-layout">
+          <aside class="app-sidebar" aria-label="Приложения автомобиля">
+            <p class="sidebar-label">Приложения</p>
+            <button class="app-button" data-app="climate"><span class="app-icon">☼</span><span>Климат</span></button>
+            <button class="app-button" data-app="seat"><span class="app-icon">♧</span><span>Кресло</span></button>
+            <button class="app-button" data-app="music"><span class="app-icon">◒</span><span>Музыка</span></button>
+            <button id="driver-thoughts-toggle" class="app-button driver-thoughts-button" type="button"><span class="app-icon">◌</span><span>Включить мысли водителя</span></button>
+          </aside>
+
+        <div class="dashboard-content">
+          <div class="dashboard-heading">
+            <div><p class="eyebrow">Доброе утро, Джордан</p><h2>Куда направляемся?</h2></div>
+            <div class="heading-weather"><span class="weather-icon">◌</span><div><strong>18°</strong><span>Ясное небо</span></div></div>
+          </div>
+
+          <div class="dashboard-grid">
+            <article class="route-card panel panel-large">
+              <div class="panel-heading"><div><span class="panel-kicker">Текущий маршрут</span><h3>Дом <span class="route-line">→</span> Морской порт</h3></div><button class="more-button" aria-label="Параметры маршрута">•••</button></div>
+              <div class="map-area" aria-label="Карта маршрута от дома до морского порта">
+                <div class="map-label map-label-home">ДОМ <span>09:41</span></div>
+                <div class="map-label map-label-destination">ПОРТ <span>10:03</span></div>
+                <svg class="route-map" viewBox="0 0 800 330" role="img" aria-label="Схема маршрута">
+                  <path class="map-road road-a" d="M-10 245 C105 210 136 268 226 218 S355 160 415 198 510 264 604 193 708 93 820 128" />
+                  <path class="map-road road-b" d="M-20 98 C105 118 164 64 272 112 S390 190 490 108 630 34 820 65" />
+                  <path class="map-road road-c" d="M127 350 C180 240 244 260 296 174 S390 60 484 74 642 204 760 0" />
+                  <path class="route-path" d="M128 225 C177 230 206 212 246 217 S312 176 359 187 420 221 474 224 536 193 576 163 604 134 650 121" />
+                  <circle class="route-start" cx="128" cy="225" r="8" /><circle class="route-end" cx="650" cy="121" r="9" />
+                  <circle class="route-pulse" cx="128" cy="225" r="18" /><circle class="route-pulse end-pulse" cx="650" cy="121" r="18" />
+                </svg>
+                <div class="map-controls"><button class="map-control" aria-label="Увеличить карту">+</button><button class="map-control" aria-label="Уменьшить карту">−</button></div>
+                <div class="route-travel"><strong>22 мин</strong><span>12,4 км · по трассе A4</span></div>
+              </div>
+            </article>
+
+            <article class="climate-card panel app-panel">
+              <div class="panel-heading"><div><span class="panel-kicker">Комфорт в салоне</span><h3>Климат</h3></div><span class="climate-state">АВТО</span></div>
+              <div class="climate-main"><span class="temperature" id="temperature">21°</span><span class="temperature-label">Комфортная температура</span></div>
+              <div class="climate-dial"><div class="dial-progress"></div><div class="dial-center"><span>°C</span></div><button class="dial-button dial-minus" id="temp-down" aria-label="Понизить температуру">−</button><button class="dial-button dial-plus" id="temp-up" aria-label="Повысить температуру">+</button></div>
+              <div class="climate-modes"><button class="mode active" data-mode="Авто">Авто</button><button class="mode" data-mode="Охлаждение">Охлаждение</button><button class="mode" data-mode="Обогрев">Обогрев</button></div>
+            </article>
+
+            <article class="seat-card panel app-panel">
+              <div class="panel-heading"><div><span class="panel-kicker">Личное пространство</span><h3>Моё кресло</h3></div><button class="more-button" aria-label="Параметры кресла">•••</button></div>
+              <div class="seat-visual"><div class="seat-icon">♧</div><div><strong>Кресло водителя</strong><span>Позиция 04 · Память</span></div></div>
+              <div class="seat-slider-row"><span>Наклон</span><input id="seat-slider" type="range" min="0" max="100" value="58" aria-label="Наклон кресла" /><output id="seat-value">58%</output></div>
+              <div class="seat-presets"><button class="preset active">01</button><button class="preset">02</button><button class="preset">+</button></div>
+            </article>
+
+            <article class="music-card panel app-panel app-panel-visible">
+              <div class="panel-heading"><div><span class="panel-kicker">Сейчас играет</span><h3>Тихое движение</h3></div><span class="music-source">◖ SOUNDWAVE</span></div>
+              <div class="track-info"><div class="album-art"><span>◒</span></div><div><strong>Ночная поездка</strong><span>Tycho · Awake</span></div><button class="favorite" aria-label="Добавить трек в избранное">♡</button></div>
+              <div class="music-progress"><div class="progress-fill"></div></div><div class="time-row"><span>1:42</span><span>4:16</span></div>
+              <div class="volume-row"><span>Громкость</span><input id="volume-slider" type="range" min="0" max="100" value="64" aria-label="Громкость музыки" /><output id="volume-value">64%</output></div>
+              <div class="music-controls"><button aria-label="Предыдущий трек">◀</button><button class="play-button" id="play-button" aria-label="Воспроизвести или поставить на паузу">▶</button><button aria-label="Следующий трек">▶</button></div>
+            </article>
+
+          </div>
+        </div>
+        </div>
+      </section>
+      <div id="sos-modal" class="modal-backdrop hidden"><div class="sos-modal" role="dialog" aria-modal="true" aria-labelledby="sos-title"><button id="close-modal" class="modal-close" aria-label="Закрыть">×</button><span class="modal-sos-icon">!</span><p class="eyebrow">Экстренная помощь</p><h2 id="sos-title">Как вам помочь?</h2><p>Выберите действие. При завершении поездки автомобиль остановится в безопасном месте.</p><div class="modal-actions"><button id="confirm-sos" class="neutral-button">Связаться с оператором</button><button id="end-trip" class="danger-button">Экстренно завершить поездку</button></div><p id="sos-status" class="sos-status" aria-live="polite"></p></div></div>
+    </main>
+    <script src="/Frontend/app.js"></script>
+  </body>
+</html>
