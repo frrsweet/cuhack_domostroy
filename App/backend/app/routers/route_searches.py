@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app.models import RouteSearch
-from app.schemas import RouteSearchCreate, RouteSearchOut
+from cuhack_domostroy.App.backend.app.database import get_db
+from cuhack_domostroy.App.backend.app.models import RouteSearch
+from cuhack_domostroy.App.backend.app.schemas import RouteSearchCreate, RouteSearchOut
 
 router = APIRouter(prefix="/route-searches", tags=["route-searches"])
 
