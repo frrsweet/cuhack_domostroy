@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Taxi Casestudy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="top-bar">
+        <h1>Добрый день!</h1>
+      </header>
+
+      <main class="main-panel">
+        <button id="orderButton" class="primary-button">заказать такси</button>
+      </main>
+    </div>
+
+    <div id="orderModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="address-block">
+            <div class="address-row">
+              <p>Откуда: <span id="fromPreview">Москва, Гашека, 7</span></p>
+              <button class="mini-map-button" data-map-target="from">Карта</button>
+            </div>
+            <div class="address-row">
+              <p>Куда: <span id="toPreview">Москва, Тверская, 7</span></p>
+              <button class="mini-map-button" data-map-target="to">Карта</button>
+            </div>
+          </div>
+          <button id="closeModal" class="close-button" aria-label="Закрыть">×</button>
+        </div>
+
+        <div class="address-form">
+          <label>
+            <span>Откуда</span>
+            <input id="fromInput" type="text" value="Москва, Гашека, 7" />
+          </label>
+          <label>
+            <span>Куда</span>
+            <input id="toInput" type="text" value="Москва, Тверская, 7" />
+          </label>
+        </div>
+
+        <div class="route-map">
+          <div class="route-header">
+            <span>Маршрут</span>
+            <span class="badge">По карте</span>
+          </div>
+          <div class="map-surface" aria-label="Маршрут по карте">
+            <svg viewBox="0 0 600 220" preserveAspectRatio="none" role="img" aria-label="Карта маршрута">
+              <rect x="0" y="0" width="600" height="220" fill="#f2f7ff"/>
+              <path d="M40 150 C120 90, 170 120, 220 80 S340 40, 420 110 S520 100, 560 70" fill="none" stroke="#5c7cfa" stroke-width="6" stroke-linecap="round" stroke-dasharray="12 10"/>
+              <path d="M40 150 C120 90, 170 120, 220 80 S340 40, 420 110 S520 100, 560 70" fill="none" stroke="#dbe4ff" stroke-width="18" stroke-linecap="round" opacity="0.9"/>
+              <circle cx="40" cy="150" r="8" fill="#2b6ae8"/>
+              <circle cx="560" cy="70" r="8" fill="#2b6ae8"/>
+              <g fill="#ffffff" stroke="#2b6ae8" stroke-width="2">
+                <circle cx="220" cy="80" r="5"/>
+                <circle cx="420" cy="110" r="5"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="tariffs-wrap">
+          <div id="tariffList" class="tariff-list" aria-label="Список тарифов"></div>
+        </div>
+
+        <button id="confirmOrderButton" class="order-submit">Заказать такси - <span id="totalPrice">400</span> рублей</button>
+      </div>
+    </div>
+
+    <div id="warningModal" class="modal hidden" aria-hidden="true">
+      <div class="warning-card">
+        <h2>Поехать можно, а зачем?</h2>
+        <p>Суть нашего кейса в беспилотных такси, другие тарифы временно в разработке. Выберите формат без пилота!</p>
+        <button id="closeWarning" class="warning-close">Закрыть</button>
+      </div>
+    </div>
+
+    <div id="routeMapModal" class="modal hidden" aria-hidden="true">
+      <div class="route-modal-card">
+        <div class="route-modal-header">
+          <h3>Маршрут</h3>
+          <button id="closeRouteMap" class="close-button" aria-label="Закрыть карту">×</button>
+        </div>
+        <div class="map-surface large" aria-label="Полная карта маршрута">
+          <svg viewBox="0 0 600 260" preserveAspectRatio="none" role="img" aria-label="Карта маршрута">
+            <rect x="0" y="0" width="600" height="260" fill="#f2f7ff"/>
+            <path d="M30 180 C120 100, 180 120, 220 90 S330 50, 390 120 S510 70, 570 90" fill="none" stroke="#5c7cfa" stroke-width="8" stroke-linecap="round" stroke-dasharray="14 12"/>
+            <path d="M30 180 C120 100, 180 120, 220 90 S330 50, 390 120 S510 70, 570 90" fill="none" stroke="#dfeaff" stroke-width="18" stroke-linecap="round"/>
+            <circle cx="30" cy="180" r="10" fill="#2b6ae8"/>
+            <circle cx="570" cy="90" r="10" fill="#2b6ae8"/>
+            <g fill="#ffffff" stroke="#2b6ae8" stroke-width="2.5">
+              <circle cx="220" cy="90" r="6"/>
+              <circle cx="390" cy="120" r="6"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div id="driverArrivalModal" class="modal hidden" aria-hidden="true">
+      <div class="driver-card">
+        <h2 id="driverStatusTitle">Водитель подъезжает</h2>
+        <p id="driverStatusText">ожидаемое время приезда - 5 секунд</p>
+
+        <div class="driver-profile">
+          <img src="images/robot.png" alt="Робот" />
+          <div class="driver-meta">
+            <strong>Робот</strong>
+            <span>Частное лИИцо</span>
+          </div>
+        </div>
+
+        <div id="driverArrivalActions" class="driver-actions"></div>
+      </div>
+    </div>
+
+    <div id="tripScreen" class="modal hidden" aria-hidden="true">
+      <div class="trip-card">
+        <div class="trip-header">
+          <h3>Время поездки - 10 минут</h3>
+        </div>
+
+        <div class="trip-map-box" aria-label="Карта поездки">
+          <svg viewBox="0 0 600 240" preserveAspectRatio="none" role="img" aria-label="Поездка по маршруту">
+            <rect x="0" y="0" width="600" height="240" fill="#eff5ff"/>
+            <path d="M50 160 C120 130, 170 160, 220 120 S330 60, 410 105 S500 145, 560 100" fill="none" stroke="#8daaff" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 12"/>
+            <path d="M50 160 C120 130, 170 160, 220 120 S330 60, 410 105 S500 145, 560 100" fill="none" stroke="#dfeaff" stroke-width="18" stroke-linecap="round"/>
+            <circle id="travelerDot" cx="50" cy="160" r="10" fill="#2b6ae8">
+              <animateMotion dur="6s" repeatCount="indefinite" rotate="auto">
+                <mpath xlink:href="#routePath"/>
+              </animateMotion>
+            </circle>
+            <path id="routePath" d="M50 160 C120 130, 170 160, 220 120 S330 60, 410 105 S500 145, 560 100" fill="none" stroke="transparent" stroke-width="1"/>
+          </svg>
+        </div>
+
+        <div class="settings-header">Настройки для пользователя:</div>
+
+        <div class="settings-space"></div>
+
+        <div class="temperature-row">
+          <button class="temp-button" data-temp-action="down" aria-label="Уменьшить температуру">-</button>
+          <div class="temperature-value">Температура: <span id="temperatureValue">25</span></div>
+          <button class="temp-button" data-temp-action="up" aria-label="Увеличить температуру">+</button>
+        </div>
+
+        <div class="music-panel">
+          <button id="musicToggle" class="music-button">Музыка: FM 104.5</button>
+        </div>
+
+        <div id="musicPopup" class="music-popup hidden" aria-hidden="true">
+          <div class="music-popup-card">
+            <h4>Выберите музыку:</h4>
+            <div class="music-choice-list">
+              <button class="music-choice" data-choice="radio">Радио</button>
+              <button class="music-choice" data-choice="track">Найти музыку</button>
+            </div>
+
+            <div id="musicInputPanel" class="music-input-panel hidden">
+              <label id="musicInputLabel">Введите частоту</label>
+              <input id="musicInput" type="text" placeholder="104.5" />
+              <div class="music-actions">
+                <button id="musicConfirm" class="primary-action">Подтвердить</button>
+                <button id="musicCancel" class="secondary-action">Отмена</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
